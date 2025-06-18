@@ -6,8 +6,6 @@ import dotenv from "dotenv";
 import connectDB from "./config/DB.js";
 import setupSocket from "./socket/index.js";
 
-
-
 //init!
 dotenv.config();
 
@@ -18,17 +16,17 @@ connectDB()
     })
     .catch((err) => {
         console.log("Something went wrong while connecting to the database!! : ", err)
-        process.exit(1);
+        // Don't exit process in serverless environment
+        // process.exit(1);
     });
 
 //inits!
 const app = express();
 app.use(cors({
-    origin: "http://localhost:3000",
+    origin: ["http://localhost:3000", "https://*.vercel.app"],
     credentials: true
 }));
 app.use(express.json());
-
 
 // Basic health check route
 app.get("/", (req, res) => {
@@ -50,11 +48,17 @@ app.get("/api/polls/history", async (req, res) => {
     }
 });
 
-const server = http.createServer(app);
-const io = setupSocket(server);
+// For Vercel deployment, export the app instead of starting a server
+export default app;
 
-const PORT = process.env.PORT || 5000;
-server.listen(PORT, () => {
-    console.log(`🚀 Server running on http://localhost:${PORT}`);
-    console.log(`📊 Socket.IO ready for connections`);
-})
+// Only start server in development
+if (process.env.NODE_ENV !== 'production') {
+    const server = http.createServer(app);
+    const io = setupSocket(server);
+
+    const PORT = process.env.PORT || 5000;
+    server.listen(PORT, () => {
+        console.log(`🚀 Server running on http://localhost:${PORT}`);
+        console.log(`📊 Socket.IO ready for connections`);
+    });
+}
