@@ -1,4 +1,4 @@
-//imports!
+// Imports
 import express from "express";
 import http from "http";
 import cors from "cors";
@@ -6,29 +6,32 @@ import dotenv from "dotenv";
 import connectDB from "./config/DB.js";
 import setupSocket from "./socket/index.js";
 
-//init!
+// Init
 dotenv.config();
 
 // Connect to database
 connectDB()
     .then(() => {
-        console.log("Connected To Database Successfully!!")
+        console.log("✅ Connected To Database Successfully!");
     })
     .catch((err) => {
-        console.log("Something went wrong while connecting to the database!! : ", err)
-        // Don't exit process in serverless environment
-        // process.exit(1);
+        console.error("❌ DB Connection Error:", err);
+        process.exit(1); // Safe to exit on render
     });
 
-//inits!
+// App + Server
 const app = express();
+const server = http.createServer(app);
+const io = setupSocket(server);
+
+// CORS setup
 app.use(cors({
     origin: ["http://localhost:3000", "https://frontend-2zru.onrender.com"],
     credentials: true
 }));
 app.use(express.json());
 
-// Basic health check route
+// Health check route
 app.get("/", (req, res) => {
     res.json({ 
         message: "Polling App Server is running!",
@@ -37,7 +40,7 @@ app.get("/", (req, res) => {
     });
 });
 
-// REST API route for poll history (optional, mainly using sockets)
+// REST API route
 app.get("/api/polls/history", async (req, res) => {
     try {
         const { getPollHistory } = await import("./controller/pollController.js");
@@ -48,17 +51,9 @@ app.get("/api/polls/history", async (req, res) => {
     }
 });
 
-// For Vercel deployment, export the app instead of starting a server
-export default app;
-
-// Only start server in development
-if (process.env.NODE_ENV !== 'production') {
-    const server = http.createServer(app);
-    const io = setupSocket(server);
-
-    const PORT = process.env.PORT || 5000;
-    server.listen(PORT, () => {
-        console.log(`🚀 Server running on http://localhost:${PORT}`);
-        console.log(`📊 Socket.IO ready for connections`);
-    });
-}
+// Start the server
+const PORT = process.env.PORT || 5000;
+server.listen(PORT, () => {
+    console.log(`🚀 Server running on http://localhost:${PORT}`);
+    console.log(`📊 Socket.IO is listening`);
+});
