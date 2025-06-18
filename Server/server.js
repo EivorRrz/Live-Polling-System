@@ -23,7 +23,7 @@ connectDB()
 //inits!
 const app = express();
 app.use(cors({
-    origin: ["http://localhost:3000", "https://*.vercel.app"],
+    origin: ["http://localhost:3000", "https://frontend-2zru.onrender.com"],
     credentials: true
 }));
 app.use(express.json());
