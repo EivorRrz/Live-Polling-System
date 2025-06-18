@@ -27,7 +27,7 @@ export const SocketProvider = ({ children }) => {
     const [kickMessage, setKickMessage] = useState('');
 
     useEffect(() => {
-        const newSocket = io('http://localhost:5000', {
+        const newSocket = io('https://server-z86q.onrender.com', {
             reconnection: true,
             reconnectionDelay: 1000,
             reconnectionAttempts: 5,
