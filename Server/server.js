@@ -26,7 +26,7 @@ const io = setupSocket(server);
 
 // CORS setup
 app.use(cors({
-    origin: [ "https://frontend-2zru.onrender.com"],
+    origin: ["https://frontend-2zru.onrender.com"],
     credentials: true
 }));
 app.use(express.json());
